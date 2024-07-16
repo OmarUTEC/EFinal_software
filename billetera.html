@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Billetera Electrónica</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+        form {
+            background-color: #f0f0f0;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 5px;
+            margin-bottom: 10px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #resultado {
+            background-color: #e0e0e0;
+            padding: 20px;
+            border-radius: 5px;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>Billetera Electrónica</h1>
+    
+    <form id="contactosForm">
+        <h2>Consultar Contactos</h2>
+        <label for="minumeroContactos">Mi número:</label>
+        <input type="text" id="minumeroContactos" required>
+        <button type="submit">Consultar Contactos</button>
+    </form>
+
+    <form id="pagarForm">
+        <h2>Realizar Pago</h2>
+        <label for="minumeroPagar">Mi número:</label>
+        <input type="text" id="minumeroPagar" required>
+        <label for="numerodestino">Número destino:</label>
+        <input type="text" id="numerodestino" required>
+        <label for="valor">Valor:</label>
+        <input type="number" id="valor" step="0.01" required>
+        <button type="submit">Realizar Pago</button>
+    </form>
+
+    <form id="historialForm">
+        <h2>Consultar Historial</h2>
+        <label for="minumeroHistorial">Mi número:</label>
+        <input type="text" id="minumeroHistorial" required>
+        <button type="submit">Consultar Historial</button>
+    </form>
+
+    <div id="resultado"></div>
+
+    <script>
+        const API_URL = 'http://127.0.0.1:5000';
+
+        async function realizarConsulta(endpoint, params) {
+            const url = new URL(`${API_URL}${endpoint}`);
+            Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
+            
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                document.getElementById('resultado').textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('resultado').textContent = `Error: ${error.message}`;
+            }
+        }
+
+        document.getElementById('contactosForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const minumero = document.getElementById('minumeroContactos').value;
+            realizarConsulta('/billetera/contactos', { minumero });
+        });
+
+        document.getElementById('pagarForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const minumero = document.getElementById('minumeroPagar').value;
+            const numerodestino = document.getElementById('numerodestino').value;
+            const valor = document.getElementById('valor').value;
+            realizarConsulta('/billetera/pagar', { minumero, numerodestino, valor });
+        });
+
+        document.getElementById('historialForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const minumero = document.getElementById('minumeroHistorial').value;
+            realizarConsulta('/billetera/historial', { minumero });
+        });
+    </script>
+</body>
+</html>
